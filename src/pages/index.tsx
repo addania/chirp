@@ -19,7 +19,7 @@ const Home: NextPage = () => {
           {!user.isSignedIn && <SignInButton />}
           {!!user.isSignedIn && (
             <>
-              <p>Hello {user.user.fullName}</p>
+              <p>Hi {user.user.fullName}</p>
               <SignOutButton />
             </>
           )}
