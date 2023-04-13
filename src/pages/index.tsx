@@ -8,6 +8,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import { api } from "~/utils/api";
 import type { RouterOutputs } from "~/utils/api";
+import { LoadingPage } from "~/components/loading";
 
 dayjs.extend(relativeTime);
 
@@ -83,12 +84,15 @@ const PostView = (props: PostWithUser) => {
   );
 };
 
-const Home: NextPage = () => {
-  const user = useUser();
-  const { data, isLoading } = api.posts.getAll.useQuery();
+const Feed = () => {
+  const { data, isLoading: pageLoading } = api.posts.getAll.useQuery();
 
-  if (isLoading) {
-    return <div className="flex w-full justify-center p-8">Loading...</div>;
+  if (pageLoading) {
+    return (
+      <div className="flex w-full justify-center p-8">
+        <LoadingPage />
+      </div>
+    );
   }
 
   if (!data) {
@@ -98,6 +102,25 @@ const Home: NextPage = () => {
       </div>
     );
   }
+
+  return (
+    <div className="flex flex-col">
+      {data.map((fullProps) => (
+        <PostView {...fullProps} key={fullProps.post.id} />
+      ))}
+    </div>
+  );
+};
+const Home: NextPage = () => {
+  const { user, isLoaded: userLoaded, isSignedIn } = useUser();
+
+  // Start fetching data early - reactQuery will cache it
+  api.posts.getAll.useQuery();
+
+  if (!userLoaded) {
+    return <div />;
+  }
+
   return (
     <>
       <Head>
@@ -108,17 +131,17 @@ const Home: NextPage = () => {
       <main className="flex h-screen justify-center">
         <div className="h-full w-full border-x border-slate-400 md:max-w-2xl">
           <div className="flex border-b border-slate-400 p-4">
-            {!user.isSignedIn && (
+            {!isSignedIn && (
               <div className="flex justify-center">
                 <SignInButton />
               </div>
             )}
-            {!!user.isSignedIn && (
+            {!!isSignedIn && (
               <div className="w-full">
                 <div className="flex w-full justify-between">
                   <div className="flex items-center  space-x-2">
                     <UserBar />
-                    <p>Hi {user.user.fullName}</p>
+                    <p>Hi {user.fullName}</p>
                   </div>
                   <SignOutButton />
                 </div>
@@ -126,11 +149,7 @@ const Home: NextPage = () => {
               </div>
             )}
           </div>
-          <div className="flex flex-col">
-            {data.map((fullProps) => (
-              <PostView {...fullProps} key={fullProps.post.id} />
-            ))}
-          </div>
+          <Feed />
         </div>
       </main>
     </>
