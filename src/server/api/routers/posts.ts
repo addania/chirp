@@ -2,7 +2,7 @@ import clerkClient, { User } from "@clerk/clerk-sdk-node";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { Ratelimit } from "@upstash/ratelimit"; // for deno: see above
+import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
 import {
@@ -59,13 +59,21 @@ export const postsRouter = createTRPCRouter({
   create: privateProcedure
     .input(
       z.object({
-        content: z.string().emoji().min(1).max(280),
+        content: z
+          .string()
+          .emoji("Contains non-emoji characters")
+          .min(1)
+          .max(280),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const authorId = ctx.userId;
 
       const { success } = await ratelimit.limit(authorId);
+
+      if (!success) {
+        throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+      }
 
       const post = await ctx.prisma.post.create({
         data: {
