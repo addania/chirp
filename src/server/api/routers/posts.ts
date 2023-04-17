@@ -1,4 +1,4 @@
-import clerkClient, { User } from "@clerk/clerk-sdk-node";
+import clerkClient from "@clerk/clerk-sdk-node";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
@@ -10,6 +10,7 @@ import {
   privateProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
@@ -17,14 +18,6 @@ const ratelimit = new Ratelimit({
   analytics: true,
   prefix: "@upstash/ratelimit",
 });
-
-const filterUserForClient = (user: User) => {
-  return {
-    id: user.id,
-    username: user.username,
-    profilePicture: user.profileImageUrl,
-  };
-};
 
 export const postsRouter = createTRPCRouter({
   getAll: publicProcedure.query(async ({ ctx }) => {

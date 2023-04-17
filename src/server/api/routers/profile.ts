@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 
 export const profileRouter = createTRPCRouter({
   getUserByUsername: publicProcedure
@@ -17,6 +18,6 @@ export const profileRouter = createTRPCRouter({
           message: "User not found",
         });
       }
-      return user;
+      return filterUserForClient(user);
     }),
 });
