@@ -68,12 +68,13 @@ import { getAuth } from "@clerk/nextjs/server";
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
   errorFormatter({ shape, error }) {
+    console.log("XXX error", error);
     return {
       ...shape,
       data: {
         ...shape.data,
         zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
+          error.cause instanceof ZodError ? error.cause.flatten() : "ABC",
       },
     };
   },

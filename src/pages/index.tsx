@@ -12,6 +12,7 @@ import { LoadingPage, LoadingSpinner } from "~/components/loading";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
+import { PageLayout } from "~/components/layout";
 
 dayjs.extend(relativeTime);
 
@@ -27,14 +28,14 @@ const CreatePostWizard = () => {
       void ctx.posts.getAll.invalidate();
     },
     onError: (e) => {
-      const errorMessage = e.data?.zodError?.fieldErrors.content;
+      const errorMessage = e.data?.zodError;
       console.log("e.data", e.data);
-      console.log("errorMessage", errorMessage);
-      if (errorMessage && errorMessage[0]) {
-        toast.error(errorMessage[0]);
-      } else {
-        toast.error("Failed to post! Please try again later.");
-      }
+      console.log("YYY errorMessage", errorMessage);
+      /* if (errorMessage && errorMessage[0]) {
+        toast.error(errorMessage[0]);*/ // DOES NOT WORK
+      //     } else {
+      toast.error("Failed to post! Please try again later.");
+      //   }
     },
   });
 
@@ -174,30 +175,28 @@ const Home: NextPage = () => {
         <meta name="description" content="💭" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex h-screen justify-center">
-        <div className="h-full w-full border-x border-slate-400 md:max-w-2xl">
-          <div className="flex border-b border-slate-400 p-4">
-            {!isSignedIn && (
-              <div className="flex justify-center">
-                <SignInButton />
-              </div>
-            )}
-            {!!isSignedIn && (
-              <div className="w-full">
-                <div className="flex w-full justify-between">
-                  <div className="flex items-center  space-x-2">
-                    <UserBar />
-                    <p>Hi {user.fullName}</p>
-                  </div>
-                  <SignOutButton />
+      <PageLayout>
+        <div className="flex border-b border-slate-400 p-4">
+          {!isSignedIn && (
+            <div className="flex justify-center">
+              <SignInButton />
+            </div>
+          )}
+          {!!isSignedIn && (
+            <div className="w-full">
+              <div className="flex w-full justify-between">
+                <div className="flex items-center  space-x-2">
+                  <UserBar />
+                  <p>Hi {user.fullName}</p>
                 </div>
-                <CreatePostWizard />
+                <SignOutButton />
               </div>
-            )}
-          </div>
-          <Feed />
+              <CreatePostWizard />
+            </div>
+          )}
         </div>
-      </main>
+        <Feed />
+      </PageLayout>
     </>
   );
 };

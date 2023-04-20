@@ -54,7 +54,7 @@ export const postsRouter = createTRPCRouter({
       z.object({
         content: z
           .string()
-          .emoji("Contains non-emoji characters")
+          .emoji({ message: "Contains non-emoji characters" })
           .min(1)
           .max(280),
       })
